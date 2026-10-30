@@ -49,7 +49,7 @@
 
     <ScreenHeader
       :direction="state === 'FIRST_STOP' ? 'Prochain départ' : 'Prochains arrêts'"
-      :is-unavailable="state === 'NOT_IN_SERVICE' || state === 'NO_TRIP_DATA_AVAILABLE' || state === 'NO_DATA'"
+      :is-unavailable="['NO_DATA', 'NO_TRIP_DATA_AVAILABLE'].includes(state)"
       :is-limited-service="desserte.isLimitedService"
       :vehicle-number="desserte.vehicleNumber"
       :is-wheel-chair-accessible="desserte.hasWheelchairAccess"
@@ -94,15 +94,9 @@
           :stop-with-time="currentStop!"
           :line-id="line?.id!"
         />
-        <DataUnavailable
-          v-else-if="state === 'NO_DATA'"
+        <Unavailable
+          v-else-if="['NO_DATA', 'NO_TRIP_DATA_AVAILABLE'].includes(state)"
           class="foreground-panel"
-        />
-        <TripUnavailable
-          v-else-if="state === 'NO_TRIP_DATA_AVAILABLE'"
-          :is-limited-service="desserte?.isLimitedService ?? false"
-          class="foreground-panel"
-          :line="line!"
         />
       </div>
 
@@ -193,12 +187,11 @@ import { useRoute } from "vue-router";
 import { useIntervalFn } from "@vueuse/core";
 import ScreenHeader from "./ScreenHeaderIDFM.vue";
 import StopList from "./MainPanelIDFM/StopList.vue";
-import DataUnavailable from "./MainPanelIDFM/DataUnavailable.vue";
+import Unavailable from "./MainPanelIDFM/DataUnavailable.vue";
 import Direction from "./MainPanelIDFM/FirstStop.vue";
 import Welcome from "./MainPanelIDFM/Welcome.vue";
 import CurrentStop from "./MainPanelIDFM/CurrentStop.vue";
-import NotInService from "./MainPanel/NotInService.vue";
-import TripUnavailable from "./MainPanel/TripUnavailable.vue";
+import NotInService from "./MainPanelIDFM/NotInService.vue";
 import ArrivingToIn from "./SidePanel/ArrivingToIn.vue";
 import LinesConnection from "./SidePanel/LinesConnection.vue";
 import Messages from "./SidePanel/Messages.vue";
@@ -322,32 +315,14 @@ const {
   triggerMessage,
 } = usePassengerMessages();
 
-const isFirstStopPanelReady = ref(true);
-const isLeavingFirstStop = ref(false);
 let firstStopTimer: ReturnType<typeof setTimeout> | undefined;
 let leavingTimer: ReturnType<typeof setTimeout> | undefined;
 
-watch(state, (newState, oldState) => {
-  if (
-    oldState === "FIRST_STOP" &&
-    newState !== "FIRST_STOP" &&
-    isFirstStopPanelReady.value
-  ) {
-    isLeavingFirstStop.value = true;
-    clearTimeout(leavingTimer);
-    leavingTimer = setTimeout(() => {
-      isLeavingFirstStop.value = false;
-    }, 850);
-  }
-});
-
 const isSplitView = computed(
   () =>
-    isLeavingFirstStop.value ||
     (state.value !== "FIRST_STOP" && shouldShowSidePanel.value) ||
     isDisplayingPassengerMessage.value ||
-    ["NO_TRIP_DATA_AVAILABLE", "NO_DATA"].includes(state.value) ||
-    (state.value === "FIRST_STOP" && isFirstStopPanelReady.value),
+    ["NO_TRIP_DATA_AVAILABLE", "NO_DATA"].includes(state.value),
 );
 
 const showAlt = ref(false);
