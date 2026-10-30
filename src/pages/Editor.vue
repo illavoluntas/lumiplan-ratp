@@ -392,6 +392,14 @@ const launchScreen = () => {
   });
   window.open(routeData.href, "_blank");
 };
+const launchScreenIDFM = () => {
+  localStorage.setItem(AUTOSAVE_KEY, getExportData());
+  const routeData = router.resolve({
+    path: "/idfm",
+    query: { loadSave: "true" },
+  });
+  window.open(routeData.href, "_blank");
+};
 
 const deleteStop = (stop: StopWithTime) => {
   desserteWithLine.value.desserte.stops =
@@ -501,6 +509,10 @@ const deleteLine = (line: Line) => {
           <button class="btn-launch-screen" @click="launchScreen">
             <span class="launch-icon">▶</span>
             Lancer l'écran
+          </button>
+          <button class="btn-launch-screen" @click="launchScreenIDFM">
+            <span class="launch-icon">▶</span>
+            Lancer l'écran IDFM
           </button>
           <button class="btn-exit" @click="router.push('/')">
             <svg
