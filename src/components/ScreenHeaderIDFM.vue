@@ -24,7 +24,10 @@
     >
       {{ vehicleNumber }}
     </div>
-    <span v-if="direction" class="direction-name" key="name">
+    <span v-if="isAtStop" class="direction-name" key="at-stop">
+      <span>Arrêt</span>
+    </span>
+    <span v-else-if="direction" class="direction-name" key="name">
       <span>{{ direction }}</span>
     </span>
     <span v-if="isUnavailable" class="direction-name" key="unavailable">
@@ -49,7 +52,7 @@
 <script setup lang="ts">
 import { Line, Mode } from "../types.ts";
 import LineLogo from "./Other/LineLogo.vue";
-import Clock from "./Other/ClockIDFM.vue";
+import Clock from "./Other/Clock.vue";
 import { computed } from "vue";
 import { useSettings } from "../composables/useSettings.ts";
 
@@ -73,6 +76,9 @@ const logoSize = computed(() => {
 </script>
 
 <style lang="scss" scoped>
+.header:deep(.divider) {
+  animation: none !important;
+}
 .header:hover {
   cursor: pointer;
 }

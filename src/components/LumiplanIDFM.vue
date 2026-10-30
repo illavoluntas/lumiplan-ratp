@@ -48,7 +48,7 @@
     ></div>
 
     <ScreenHeader
-      :direction="state === 'FIRST_STOP' ? 'Prochain départ' : desserte.direction"
+      :direction="state === 'FIRST_STOP' ? 'Prochain départ' : 'Prochains arrêts'"
       :is-unavailable="state === 'NOT_IN_SERVICE' || state === 'NO_TRIP_DATA_AVAILABLE' || state === 'NO_DATA'"
       :is-limited-service="desserte.isLimitedService"
       :vehicle-number="desserte.vehicleNumber"
@@ -70,10 +70,15 @@
         />
 
         <Direction
-          v-if="state === 'FIRST_STOP'"
+          v-if="state === 'FIRST_STOP'
+            && !shouldDisplayAlt"
           class="foreground-panel"
           :direction="desserte.direction"
           :departure-date="currentStop!.timeOfDeparture"
+        />
+        <Welcome
+          v-else-if="state === 'FIRST_STOP' && shouldDisplayAlt"
+          class="foreground-panel"
         />
         <NotInService
           v-else-if="state === 'NOT_IN_SERVICE'"
@@ -187,10 +192,11 @@ import { ref, onMounted, onUnmounted, watch, computed } from "vue";
 import { useRoute } from "vue-router";
 import { useIntervalFn } from "@vueuse/core";
 import ScreenHeader from "./ScreenHeaderIDFM.vue";
-import StopList from "./MainPanel/StopList.vue";
+import StopList from "./MainPanelIDFM/StopList.vue";
 import DataUnavailable from "./MainPanelIDFM/DataUnavailable.vue";
-import Direction from "./MainPanel/Direction.vue";
-import CurrentStop from "./MainPanel/CurrentStop.vue";
+import Direction from "./MainPanelIDFM/FirstStop.vue";
+import Welcome from "./MainPanelIDFM/Welcome.vue";
+import CurrentStop from "./MainPanelIDFM/CurrentStop.vue";
 import NotInService from "./MainPanel/NotInService.vue";
 import TripUnavailable from "./MainPanel/TripUnavailable.vue";
 import ArrivingToIn from "./SidePanel/ArrivingToIn.vue";
@@ -343,6 +349,24 @@ const isSplitView = computed(
     ["NO_TRIP_DATA_AVAILABLE", "NO_DATA"].includes(state.value) ||
     (state.value === "FIRST_STOP" && isFirstStopPanelReady.value),
 );
+
+const showAlt = ref(false);
+
+useIntervalFn(() => {
+  showAlt.value = !showAlt.value;
+}, 10_000, { immediate: true });
+
+const isAltWindow = computed(() => {
+  if (state.value !== "FIRST_STOP" || !currentStop.value?.timeOfDeparture) {
+    return false;
+  }
+  const seconds = getSecondesFromDate(currentStop.value.timeOfDeparture);
+  return seconds > 59 && seconds <= 5 * 60;
+});
+
+const shouldDisplayAlt = computed(() => {
+  return showAlt.value && isAltWindow.value;
+});
 
 const loadSaveModalRef = ref<InstanceType<typeof LoadSaveModal> | null>(null);
 const settingsModalRef = ref<InstanceType<typeof SettingsModal> | null>(null);
@@ -569,7 +593,7 @@ main {
   width: 100%;
   height: 100%;
   z-index: 2;
-  background-color: var(--ratp-beige);
+  background-color: white;
 }
 main.split-view {
   grid-template-columns: 65% 35%;

@@ -26,6 +26,12 @@ export const getSecondesFromDate = (
 export const getMinutesFromDate = (dateString: string): number => {
   return Math.max(0, Math.floor(getSecondesFromDate(dateString) / 60));
 };
+export const getMinSecFromDate = (dateString: string): Array<number> => {
+  const totalSeconds = getSecondesFromDate(dateString);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return [minutes, seconds];
+}
 /**
  * Clean and strip a stop id or a line id
  * From STIF::Line:C01742: to C01742 or from STIF::StopPoint:SP:18455: to 18455
