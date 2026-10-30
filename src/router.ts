@@ -1,6 +1,7 @@
 import { createWebHistory, createRouter } from "vue-router";
 import Home from "./pages/Home.vue";
 import Screen from "./pages/Screen.vue";
+import ScreenIDFM from "./pages/ScreenIDFM.vue";
 import Editor from "./pages/Editor.vue";
 
 const routes = [
@@ -9,6 +10,11 @@ const routes = [
     name: "DesserteDetails",
     path: "/screen/:line?/:trip?",
     component: Screen,
+  },
+  {
+    name: "DesserteDetailsIDFM",
+    path: "/idfm/:line?/:trip?",
+    component: ScreenIDFM,
   },
   {
     name: "Editor",
