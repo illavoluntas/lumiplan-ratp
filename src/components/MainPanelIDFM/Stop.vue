@@ -149,19 +149,18 @@ const isStopCurrent = (stop: StopWithTime, index: number) => {
 
 .stop-name {
   color: black;
-  font-size: calc(1cqw * (42/1920)*100);
+  font-size: calc(1cqw * (60/1920)*100);
   text-box: trim-both cap alphabetic;
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
-  height: 5cqw;
 }
 .stop-name-long {
-  font-size: 4cqw;
+  font-size: calc(1cqw * (50/1920)*100);
 }
 
 .stop-name-very-long {
-  font-size: 3.5cqw;
+  font-size: calc(1cqw * (42/1920)*100);
 }
 
 .non-accessible-stop {

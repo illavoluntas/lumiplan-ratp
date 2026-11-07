@@ -9,10 +9,6 @@ import { computed, ref } from "vue";
 import { getSecondesFromDate, getMinSecFromDate } from "../../utils";
 import { useIntervalFn } from "@vueuse/core";
 
-interface Props {
-  departureDate: string;
-}
-
 function padTime(value: number): string {
   return value.toString().padStart(2, "0");
 }
@@ -34,9 +30,7 @@ useIntervalFn(() => {
 
 </script>
 <template>
-  <main
-    v-if="remainingSeconds <= 5*60"
-    class="direction">
+  <main class="direction">
       <div class="direction-label">
         <span>Direction</span>
       </div>
@@ -51,14 +45,6 @@ useIntervalFn(() => {
       >
         {{ displayedMinutes }}
       </div>
-  </main>
-  <main
-    v-else
-    class="direction">
-      <div class="welcome-label">
-        <span>Bienvenue sur le réseau</span>
-      </div>
-      <img class="welcome-logo" src="../../assets/img/logo-idfm.svg" alt="Île-de-France mobilités" />
   </main>
 </template>
 <style lang="css" scoped>

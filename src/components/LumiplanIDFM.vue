@@ -48,7 +48,10 @@
     ></div>
 
     <ScreenHeader
-      :direction="state === 'FIRST_STOP' ? 'Prochain départ' : 'Prochains arrêts'"
+      :direction="
+        state === 'FIRST_STOP' && !shouldDisplayAlt ? 'Prochain départ' :
+        shouldDisplayAlt ? '' : 'Prochains arrêts'
+      "
       :is-unavailable="['NO_DATA', 'NO_TRIP_DATA_AVAILABLE'].includes(state)"
       :is-limited-service="desserte.isLimitedService"
       :vehicle-number="desserte.vehicleNumber"
@@ -97,6 +100,13 @@
         <Unavailable
           v-else-if="['NO_DATA', 'NO_TRIP_DATA_AVAILABLE'].includes(state)"
           class="foreground-panel"
+        />
+      </div>
+      <div class="pages-count">
+        <PageIndicator
+          v-if="state === 'FIRST_STOP'"
+          :total-pages="totalPages"
+          :current-page-index="!shouldDisplayAlt ? 0 : 1"
         />
       </div>
 
@@ -186,6 +196,7 @@ import { ref, onMounted, onUnmounted, watch, computed } from "vue";
 import { useRoute } from "vue-router";
 import { useIntervalFn } from "@vueuse/core";
 import ScreenHeader from "./ScreenHeaderIDFM.vue";
+import PageIndicator from "./MainPanelIDFM/PageIndicator.vue";
 import StopList from "./MainPanelIDFM/StopList.vue";
 import Unavailable from "./MainPanelIDFM/DataUnavailable.vue";
 import Direction from "./MainPanelIDFM/FirstStop.vue";
@@ -331,16 +342,22 @@ useIntervalFn(() => {
   showAlt.value = !showAlt.value;
 }, 10_000, { immediate: true });
 
-const isAltWindow = computed(() => {
-  if (state.value !== "FIRST_STOP" || !currentStop.value?.timeOfDeparture) {
+const secondsToDeparture = computed(() => {
+  if (!currentStop.value?.timeOfDeparture) return null;
+  return getSecondesFromDate(currentStop.value.timeOfDeparture);
+})
+const shouldDisplayAlt = computed(() => {
+  if (state.value !== "FIRST_STOP" || secondsToDeparture.value === null) {
     return false;
   }
-  const seconds = getSecondesFromDate(currentStop.value.timeOfDeparture);
-  return seconds > 59 && seconds <= 5 * 60;
+  if (secondsToDeparture.value > 300) return true;
+  if (secondsToDeparture.value > 59) return showAlt.value;
+  return false;
 });
 
-const shouldDisplayAlt = computed(() => {
-  return showAlt.value && isAltWindow.value;
+const totalPages = computed(() => {
+  const seconds = secondsToDeparture.value;
+  return seconds !== null && seconds > 59 && seconds <= 300 ? 2 : 1;
 });
 
 const loadSaveModalRef = ref<InstanceType<typeof LoadSaveModal> | null>(null);
@@ -717,5 +734,17 @@ button.toolbar-toggle-large {
 .main-panel-wrapper:has(.current-stop-panel, .direction, .is-current)
   :deep(.next-stop-container) {
   opacity: 0;
+}
+
+.pages-count {
+  position: absolute;
+  right: calc(1cqw * (40/1920)*100);
+  bottom: 0;
+  height: calc(1cqw * (30/1920)*100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  gap: calc(1cqw * (25/1920)*100);
 }
 </style>

@@ -5,17 +5,6 @@ import { StopWithTime } from "../../types";
 
 const props = defineProps<{ stops: StopWithTime[]; primaryColor: string; textColor: string }>();
 
-const terminusLabel = "HELLO";
-const nextStopLabel = "WORLD";
-
-const currentDescription = computed(() => {
-  if (props.stops.length === 0) return "";
-  const isTerminusScenario =
-    props.stops[props.stops.length - 1].isTerminus && props.stops.length === 1;
-
-  return isTerminusScenario ? terminusLabel : nextStopLabel;
-});
-
 const getIndexForStop = (i: number) => {
   const stop0 = props.stops[0];
   const stop1 = props.stops[1];
@@ -90,7 +79,7 @@ const getIndexForStop = (i: number) => {
   margin: 0;
   height: 100%;
   position: relative;
-  margin-top: 2cqw;
+  margin-top: calc(1cqw * (46/1920)*100);
   gap: 3cqw;
   width: 100%;
   display: flex;
